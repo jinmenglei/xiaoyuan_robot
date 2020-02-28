@@ -1,0 +1,116 @@
+<launch>
+ 
+  <node pkg="tf" type="static_transform_publisher" name="base_to_link" args="0 0 0 0 0.0 0.0  base_footprint base_link 100" />
+ 	<node pkg="tf" type="static_transform_publisher" name="base_to_laser" args="0.05 0.0 0.25 0.0 0.0 0.0  base_link laser 100" />
+  
+
+	<!--Start the robot's base control code and publish the odometer data-->
+
+	<node pkg="xiaoyuan_robot" type="xiaoyuan_robot_node" name="publish_odom" output="screen">
+	<param name="usart_port"         type="string" value="/dev/xiaoyuan_base"/>  
+	<param name="baud_data"          type="int"    value="115200"/>
+	<param name="robot_frame_id"     type="string" value="base_footprint"/>
+	<param name="smoother_cmd_vel"   type="string" value="/smoother_cmd_vel"/>
+	<param name="use_imu_provied_Z"  type="bool"   value="true"/>
+	<param name="filter_Vx_match"    type="double" value="1.0"/>
+	<param name="filter_Vth_match"   type="double" value="1.0"/>
+	</node>
+<!--
+  <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
+  <param name="serial_port"         type="string" value="/dev/xiaoyuan_rplidar"/>
+  <param name="serial_baudrate"     type="int"    value="115200"/>
+  <param name="frame_id"            type="string" value="laser"/>
+  <param name="inverted"            type="bool"   value="false"/>
+  <param name="angle_compensate"    type="bool"   value="true"/>
+  </node>
+-->
+
+<!--
+	<node pkg="robot_pose" type="robot_imu_node" name="robot_imu_publish" output="screen">
+	<param name="Serial_port"        type="string" value="/dev/xiaoyuan_imu"/>  
+	<param name="Serial_bound"       type="int"    value="115200"/>
+	<param name="gyro_frame_id"      type="string" value="gyro_link"/>
+  <param name="filter_Vth_imu"     type="double" value="1.025"/>
+	</node>
+
+-->
+
+ <!--leishen_lidar  -->
+
+   <node pkg="lslidar_n301_driver" type="lslidar_n301_driver_node" name="lslidar_n301_driver_node" output="screen">
+    <param name="frame_id" value="laser"/>
+    <param name="device_ip" value="192.168.1.222"/>
+    <param name="device_port" value="2368"/>
+    </node>
+
+   	<node pkg="lslidar_n301_decoder" type="lslidar_n301_decoder_node" name="lslidar_n301_decoder_node" output="screen">
+    <param name="child_frame_id" value="laser"/>
+    <param name="point_num" value="2000"/>
+    <param name="angle_disable_min" value="120"/>
+    <param name="angle_disable_max" value="240"/>
+    <param name="min_range" value="0.4"/>
+    <param name="max_range" value="100.0"/>
+    <param name="frequency" value="10.0"/>
+    <param name="publish_point_cloud" value="false"/>
+   </node>
+
+	 <!--run ThRadar-->
+   <!--
+   <node name="ThRadar" pkg="radarrosinterface" type="radarmain" output="screen">
+	<param name="radarno" value="1"/>
+	<param name="ip" value="192.168.1.200"/>
+	<param name="port" value="1112"/>
+	<param name="minrange" value="0.08"/>
+	<param name="angle" value="90"/>
+   </node>
+   -->
+
+<!--
+	<node name="urg_node"          pkg="urg_node"  type="urg_node" output="screen">
+	<param name="ip_address" value="192.168.3.21"/>
+    <param name="serial_port" value="/dev/ttyACM0"/>
+    <param name="serial_baud" value="115200"/>
+    <param name="frame_id" value="laser"/>
+    <param name="publish_intensity" value="false"/>
+    <param name="publish_multiecho" value="false"/>
+    <param name="angle_min" value="-1.5707963"/>
+    <param name="angle_max" value="1.5707963"/> 
+	</node>
+-->
+
+ <!--rosbridge-->
+   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+ 
+	<include file="$(find smartcar_description)/launch/smartcar_model.launch"/>
+
+
+	<arg name="node_name"             value="velocity_smoother"/>
+	<arg name="nodelet_manager_name"  value="nodelet_manager"/>
+	<arg name="config_file"           value="$(find xiaoyuan_robot)/param/xiaoyuan_smoother.yaml"/>
+	<arg name="raw_cmd_vel_topic"     value="cmd_vel"/>
+	<arg name="smooth_cmd_vel_topic"  value="smoother_cmd_vel"/>
+	<arg name="robot_cmd_vel_topic"   value="robot_cmd_vel"/>
+	<arg name="odom_topic"            value="odom"/>
+  
+
+  <node pkg="nodelet" type="nodelet" name="$(arg nodelet_manager_name)" args="manager"/>
+  
+
+  <include file="$(find yocs_velocity_smoother)/launch/velocity_smoother.launch">
+    <arg name="node_name"             value="$(arg node_name)"/>
+    <arg name="nodelet_manager_name"  value="$(arg nodelet_manager_name)"/>
+    <arg name="config_file"           value="$(arg config_file)"/>
+    <arg name="raw_cmd_vel_topic"     value="$(arg raw_cmd_vel_topic)"/>
+    <arg name="smooth_cmd_vel_topic"  value="$(arg smooth_cmd_vel_topic)"/>
+    <arg name="robot_cmd_vel_topic"   value="$(arg robot_cmd_vel_topic)"/>
+    <arg name="odom_topic"            value="$(arg odom_topic)"/>
+  </include>
+
+  
+  <node pkg="beginner_tutorials" type="test_pub" name="test_pub" output="screen">
+  </node>
+
+</launch>
+
+
+
