@@ -79,9 +79,15 @@
 -->
 
  <!--rosbridge-->
-   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
- 
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+
+ <!-- filter lidar angle -->
+  <include file="$(find lslidar_filter)/launch/lslidar_trans.launch"/>
+
+ <!-- robot model -->
 	<include file="$(find smartcar_description)/launch/smartcar_model.launch"/>
+
+  <node pkg="xiaoyuan_robot" name="location" type="location_v2.py" output="screen" />
 
 
 	<arg name="node_name"             value="velocity_smoother"/>

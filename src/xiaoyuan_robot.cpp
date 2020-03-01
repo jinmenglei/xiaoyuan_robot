@@ -46,6 +46,7 @@ keysi_start_object::keysi_start_object()
 	this->follow_pub = n.advertise<std_msgs::Int32MultiArray>("/follow_msg",1000);
 	this->move_base_cancel_pub = n.advertise<std_msgs::String>("/move_base_cancel",1000);
 	this->get_model_pub = n.advertise<std_msgs::String>("/get_model",1000);
+	m_pstop_flag_pub = n.advertise<std_msgs::Bool>("/stop_flag", 1000);
 	// heartbeatTimer =  n.createTimer(ros::Duration(0.1), &keysi_start_object::SendHeartbeat2Gujin,this);
 
 	/**open seril device**/
@@ -80,6 +81,14 @@ void keysi_start_object::stop_flag_callback(const std_msgs::Bool::ConstPtr& stop
 		//ROS_INFO("sendx = %f, senz = %f",twist_aux.linear.x,twist_aux.angular.z);
 			Robot_Serial.write(SendSpeed_data.buffer, sizeof(SendSpeed_data.buffer));
 		}
+
+		std_msgs::String send_msg;
+		move_base_cancel_pub.publish(send_msg);
+
+		std_msgs::Bool bsend_msg;
+		bsend_msg.data = false;
+		m_pstop_flag_pub.publish(bsend_msg);
+
 	}else
 	{
 		ROS_INFO("keysi_start_object:: release !");

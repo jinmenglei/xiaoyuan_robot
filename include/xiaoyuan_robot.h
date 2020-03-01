@@ -100,7 +100,7 @@ class keysi_start_object
 		ros::Timer heartbeatTimer;
 
 		ros::Subscriber cmd_vel_sub, Imu_velocity_sub, follow_cmd_vel_sub, movebase_cmd_vel_sub, robot_mode_sub, stop_flag_sub, get_model_sub;
-		ros::Publisher odom_pub,follow_pub, get_model_pub, move_base_cancel_pub;
+		ros::Publisher odom_pub,follow_pub, get_model_pub, move_base_cancel_pub, m_pstop_flag_pub;
 		ros::Subscriber cmd_heart_status;
 
 		//Defines the message type to be transmitted geometry_msgs
